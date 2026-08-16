@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>每日打卡学习</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>每日打卡学习</h1>
+    <div class="module-selector">
+      <label for="moduleSelect">知识模块</label>
+      <select id="moduleSelect"></select>
+    </div>
+  </header>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="checkin">打卡</button>
+    <button class="tab-btn" data-tab="learn">学习</button>
+    <button class="tab-btn" data-tab="favorites">收藏</button>
+    <button class="tab-btn" data-tab="records">记录</button>
+    <button class="tab-btn" data-tab="settings">设置</button>
+  </nav>
+
+  <main>
+    <!-- 打卡 -->
+    <section id="tab-checkin" class="tab-panel active">
+      <div class="card checkin-card">
+        <div class="checkin-status" id="checkinStatus">
+          <div class="date-today" id="todayDate"></div>
+          <div class="streak" id="streakDisplay">连续 0 天</div>
+          <button id="checkinBtn" class="primary-btn">今日打卡</button>
+        </div>
+        <div class="today-plan" id="todayPlan"></div>
+      </div>
+    </section>
+
+    <!-- 学习 -->
+    <section id="tab-learn" class="tab-panel">
+      <div class="card">
+        <div class="card-head">
+          <h2>每日学习</h2>
+          <span class="progress-text" id="learnProgress"></span>
+        </div>
+        <div id="learnArea"></div>
+      </div>
+    </section>
+
+    <!-- 收藏 -->
+    <section id="tab-favorites" class="tab-panel">
+      <div class="card">
+        <div class="card-head">
+          <h2>我的收藏</h2>
+          <span class="progress-text" id="favCount"></span>
+        </div>
+        <div id="favoritesArea"></div>
+      </div>
+    </section>
+
+    <!-- 记录 -->
+    <section id="tab-records" class="tab-panel">
+      <div class="card">
+        <h2>我的记录</h2>
+        <div id="recordsArea"></div>
+      </div>
+    </section>
+
+    <!-- 设置 -->
+    <section id="tab-settings" class="tab-panel">
+      <div class="card">
+        <h2>设置</h2>
+        <div class="setting-row">
+          <label for="dailyCount">每日学习条数</label>
+          <input type="number" id="dailyCount" min="1" max="20" value="5">
+        </div>
+        <button id="resetBtn" class="ghost-btn">清空所有数据</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
