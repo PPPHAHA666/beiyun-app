@@ -22,6 +22,10 @@ body {
   margin: 0 auto;
   padding: 16px;
   padding-bottom: 80px;
+  /* 独立全屏时的安全区 */
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
 }
 
 .app-header {
