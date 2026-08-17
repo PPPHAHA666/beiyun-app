@@ -1,4 +1,5 @@
 // ============ 常量与状态 ============
+const APP_VERSION = 'V2026-0817-1239';
 const LS_MODULES = 'dk_modules';
 const LS_SETTINGS = 'dk_settings';
 const LS_CHECKINS = 'dk_checkins';      // { 'YYYY-MM-DD': true }
@@ -83,6 +84,9 @@ async function init() {
 
   $('#checkinBtn').addEventListener('click', doCheckin);
   $('#resetBtn').addEventListener('click', resetAll);
+
+  // 设置页显示版本号
+  $('#appVersion').textContent = '版本号 ' + APP_VERSION;
 
   initTabs();
   switchModule();

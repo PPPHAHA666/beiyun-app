@@ -146,6 +146,13 @@ body {
 .fav-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .fav-open { margin-top: 8px; color: var(--primary-dark); font-size: 13px; }
 
+.app-version {
+  margin-top: 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 /* quiz */
 .quiz-question { margin-bottom: 20px; }
 .quiz-title { font-weight: 600; margin-bottom: 10px; }
