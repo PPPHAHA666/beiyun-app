@@ -1,5 +1,5 @@
 /* 每日打卡学习 - Service Worker */
-const CACHE = 'dk-checkin-v1';
+const CACHE = 'dk-checkin-v2';
 const ASSETS = [
   './',
   './index.html',
