@@ -273,11 +273,14 @@ function renderLearn() {
   const item = state.learnQueue[state.learnIndex];
   const done = state.learned[item.id] === todayKey();
   const fav = isFavorite(item.id);
+  const prevBtn = state.learnIndex > 0
+    ? `<button class="small-btn" id="learnPrevBtn">上一题</button>` : '';
   area.innerHTML = `
     <div class="learn-item">
       <div class="item-title">${esc(item.title)}</div>
       <div class="item-content">${esc(item.content)}</div>
       <div class="item-actions">
+        ${prevBtn}
         <button class="small-btn ${fav ? 'fav-active' : ''}" id="learnFavBtn">${fav ? '★ 已收藏' : '☆ 收藏'}</button>
         <button class="small-btn" id="learnDoneBtn">${done ? '已学会 ✓' : '标记学会了'}</button>
         <button class="small-btn" id="learnNextBtn">${state.learnIndex === state.learnQueue.length-1 ? '完成' : '下一题'}</button>
@@ -289,6 +292,12 @@ function renderLearn() {
     save(LS_LEARNED, state.learned);
     renderLearn();
   });
+  if (state.learnIndex > 0) {
+    $('#learnPrevBtn').addEventListener('click', () => {
+      state.learnIndex--;
+      renderLearn();
+    });
+  }
   $('#learnNextBtn').addEventListener('click', () => {
     state.learned[item.id] = todayKey();
     save(LS_LEARNED, state.learned);
