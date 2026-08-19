@@ -1,6 +1,6 @@
 // ============ 常量与状态 ============
 // 版本号按北京时间（UTC+8）生成
-const APP_VERSION = 'V2026-0819-2054';
+const APP_VERSION = 'V2026-0819-2151';
 const LS_MODULES = 'dk_modules';
 const LS_SETTINGS = 'dk_settings';
 const LS_CHECKINS = 'dk_checkins';      // { 'YYYY-MM-DD': true }
@@ -304,8 +304,6 @@ function renderLearn() {
     });
   }
   $('#learnNextBtn').addEventListener('click', () => {
-    state.learned[item.id] = todayKey();
-    save(LS_LEARNED, state.learned);
     if (state.learnIndex < state.learnQueue.length - 1) {
       state.learnIndex++;
       renderLearn();
