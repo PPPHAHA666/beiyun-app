@@ -1,5 +1,5 @@
 // ============ 常量与状态 ============
-const APP_VERSION = 'V2026-0817-1343';
+const APP_VERSION = 'V2026-0819-1251';
 const LS_MODULES = 'dk_modules';
 const LS_SETTINGS = 'dk_settings';
 const LS_CHECKINS = 'dk_checkins';      // { 'YYYY-MM-DD': true }
