@@ -1,6 +1,6 @@
 // ============ 常量与状态 ============
 // 版本号按北京时间（UTC+8）生成
-const APP_VERSION = 'V2026-0822-1717';
+const APP_VERSION = 'V2026-0822-1811';
 const LS_MODULES = 'dk_modules';
 const LS_SETTINGS = 'dk_settings';
 const LS_CHECKINS = 'dk_checkins';      // { 'YYYY-MM-DD': true }
@@ -120,18 +120,23 @@ function switchModule() {
 // ============ 打卡 ============
 function isCheckedIn() { return !!state.checkins[todayKey()]; }
 
-// 今日已学条数（当前模块）
+// 今日新学会（当天标记为掌握）的条数，仅用于当日打卡进度
 function todayLearnedCount() {
   const today = todayKey();
   return (state.module.items || []).filter(i => state.learned[i.id] === today).length;
 }
 
-// 今日打卡需完成的条数（不超过模块总量）
+// 永久掌握：标记过一次即永久生效，未来不再学习
+function isMastered(id) { return !!state.learned[id]; }
+function masteredCount() { return (state.module.items || []).filter(i => isMastered(i.id)).length; }
+
+// 今日打卡需完成的条数（不超过仍在学的未掌握数量；已全部掌握时为 0）
 function requiredCount() {
-  return Math.min(state.settings.dailyCount, (state.module.items || []).length);
+  const remain = (state.module.items || []).filter(i => !isMastered(i.id)).length;
+  return Math.min(state.settings.dailyCount, remain);
 }
 
-// 是否达到今日打卡门槛
+// 是否达到今日打卡门槛（全部掌握时自动达标）
 function canCheckIn() { return todayLearnedCount() >= requiredCount(); }
 
 function calcStreak() {
@@ -249,8 +254,7 @@ function learnItem(id) {
 // ============ 学习 ============
 function prepareLearn() {
   const items = state.module.items;
-  const today = todayKey();
-  const unlearned = items.filter(i => state.learned[i.id] !== today);
+  const unlearned = items.filter(i => !isMastered(i.id));
   if (!unlearned.length) {
     state.learnQueue = [];
     state.learnIndex = 0;
@@ -266,17 +270,17 @@ function prepareLearn() {
 function renderLearn() {
   const area = $('#learnArea');
   if (!state.learnQueue.length) {
-    const need = requiredCount();
-    const learned = todayLearnedCount();
-    const finished = learned >= (state.module.items || []).length;
-    area.innerHTML = `<div class="empty-tip">${finished ? '今日知识已全部学完 🎉' : '当前模块还没有知识条目，请先在数据中添加。'}</div>`;
-    $('#learnProgress').textContent = finished ? `已完成 ${learned} 条` : '';
+    const all = state.module.items || [];
+    const mastered = masteredCount();
+    const finished = all.length > 0 && all.every(i => isMastered(i.id));
+    area.innerHTML = `<div class="empty-tip">${finished ? `本模块知识已全部掌握 🎉（已掌握 ${mastered}/${all.length} 条）` : '当前模块还没有知识条目，请先在数据中添加。'}</div>`;
+    $('#learnProgress').textContent = finished ? `已掌握 ${mastered}/${all.length} 条` : '';
     renderCheckin();
     return;
   }
   $('#learnProgress').textContent = `${state.learnIndex + 1} / ${state.learnQueue.length}`;
   const item = state.learnQueue[state.learnIndex];
-  const done = state.learned[item.id] === todayKey();
+  const done = isMastered(item.id);
   const fav = isFavorite(item.id);
   const prevBtn = state.learnIndex > 0
     ? `<button class="small-btn" id="learnPrevBtn">上一题</button>` : '';
@@ -293,9 +297,15 @@ function renderLearn() {
     </div>`;
   $('#learnFavBtn').addEventListener('click', () => toggleFavorite(item.id));
   $('#learnDoneBtn').addEventListener('click', () => {
+    if (isMastered(item.id)) return; // 已永久掌握
     state.learned[item.id] = todayKey();
     save(LS_LEARNED, state.learned);
-    renderLearn();
+    if (state.learnIndex < state.learnQueue.length - 1) {
+      state.learnIndex++;
+      renderLearn();
+    } else {
+      finishBatch();
+    }
   });
   if (state.learnIndex > 0) {
     $('#learnPrevBtn').addEventListener('click', () => {
@@ -313,26 +323,27 @@ function renderLearn() {
   });
 }
 
-// 一批学完：达到设定数后继续可再学，全部学完则结束
+// 一批结束：达到设定数后可继续学剩余未掌握条目，全部掌握则完成本模块
 function finishBatch() {
   const area = $('#learnArea');
-  const today = todayKey();
-  const unlearned = (state.module.items || []).filter(i => state.learned[i.id] !== today);
-  const learned = todayLearnedCount();
+  const all = state.module.items || [];
+  const unmastered = all.filter(i => !isMastered(i.id));
+  const mastered = all.length - unmastered.length;
   const need = requiredCount();
-  if (!unlearned.length) {
-    area.innerHTML = `<div class="empty-tip">今日知识已全部学完 🎉（共 ${learned} 条）</div>`;
-    $('#learnProgress').textContent = '已完成';
+  const newlyToday = todayLearnedCount();
+  if (!unmastered.length) {
+    area.innerHTML = `<div class="empty-tip">本模块知识已全部掌握 🎉（共 ${all.length} 条）</div>`;
+    $('#learnProgress').textContent = `已掌握 ${all.length}/${all.length} 条`;
   } else {
-    const msg = learned >= need
-      ? `今日设定学习已完成（${learned}/${need}），还可继续学习剩余 ${unlearned.length} 条`
-      : `今日学习进度 ${learned}/${need}，继续学习剩余 ${unlearned.length} 条`;
+    const msg = newlyToday >= need
+      ? `今日设定学习已完成（${newlyToday}/${need}），还可继续掌握剩余 ${unmastered.length} 条`
+      : `今日学习进度 ${newlyToday}/${need}，继续掌握剩余 ${unmastered.length} 条`;
     area.innerHTML = `
       <div class="empty-tip">${msg}</div>
       <div style="text-align:center;margin-top:8px;">
         <button class="primary-btn" id="continueLearnBtn">继续学习</button>
       </div>`;
-    $('#learnProgress').textContent = `已完成 ${learned} 条`;
+    $('#learnProgress').textContent = `已掌握 ${mastered}/${all.length} 条`;
     $('#continueLearnBtn').addEventListener('click', () => prepareLearn());
   }
   renderCheckin();
@@ -349,13 +360,14 @@ function renderRecords() {
   const moduleName = state.module ? state.module.name : '—';
   const total = state.module ? (state.module.items || []).length : 0;
   const todayLearned = todayLearnedCount();
+  const mastered = state.module ? masteredCount() : 0;
 
   area.innerHTML = `
     <div class="record-block">
       <h3>学习统计（${esc(moduleName)}）</h3>
       <div class="record-list">
-        <span class="record-chip good">今日已学 ${todayLearned} 条</span>
-        <span class="record-chip">总题数 ${total} 条</span>
+        <span class="record-chip good">已掌握 ${mastered}/${total} 条</span>
+        <span class="record-chip">今日新学 ${todayLearned} 条</span>
       </div>
     </div>
     <div class="record-block">
