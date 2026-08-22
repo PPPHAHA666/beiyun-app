@@ -1,6 +1,6 @@
 // ============ 常量与状态 ============
 // 版本号按北京时间（UTC+8）生成
-const APP_VERSION = 'V2026-0819-2151';
+const APP_VERSION = 'V2026-0822-1717';
 const LS_MODULES = 'dk_modules';
 const LS_SETTINGS = 'dk_settings';
 const LS_CHECKINS = 'dk_checkins';      // { 'YYYY-MM-DD': true }
@@ -346,7 +346,18 @@ function renderRecords() {
     ? `<div class="record-list">${days.map(d => `<span class="record-chip good">${d}</span>`).join('')}</div>`
     : `<div class="record-empty">还没有打卡记录</div>`;
 
+  const moduleName = state.module ? state.module.name : '—';
+  const total = state.module ? (state.module.items || []).length : 0;
+  const todayLearned = todayLearnedCount();
+
   area.innerHTML = `
+    <div class="record-block">
+      <h3>学习统计（${esc(moduleName)}）</h3>
+      <div class="record-list">
+        <span class="record-chip good">今日已学 ${todayLearned} 条</span>
+        <span class="record-chip">总题数 ${total} 条</span>
+      </div>
+    </div>
     <div class="record-block">
       <h3>打卡记录（近30天）</h3>${checkinHtml}
     </div>`;
