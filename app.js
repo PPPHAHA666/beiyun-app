@@ -1,6 +1,6 @@
 // ============ 常量与状态 ============
 // 版本号按北京时间（UTC+8）生成
-const APP_VERSION = 'V2026-0822-1811';
+const APP_VERSION = 'V2026-0925-2038';
 const LS_MODULES = 'dk_modules';
 const LS_SETTINGS = 'dk_settings';
 const LS_CHECKINS = 'dk_checkins';      // { 'YYYY-MM-DD': true }
