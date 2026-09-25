@@ -1,6 +1,6 @@
 // ============ 常量与状态 ============
 // 版本号按北京时间（UTC+8）生成
-const APP_VERSION = 'V2026-0925-2038';
+const APP_VERSION = 'V2026-0925-2054';
 const LS_MODULES = 'dk_modules';
 const LS_SETTINGS = 'dk_settings';
 const LS_CHECKINS = 'dk_checkins';      // { 'YYYY-MM-DD': true }
@@ -291,13 +291,20 @@ function renderLearn() {
       <div class="item-actions">
         ${prevBtn}
         <button class="small-btn ${fav ? 'fav-active' : ''}" id="learnFavBtn">${fav ? '★ 已收藏' : '☆ 收藏'}</button>
-        <button class="small-btn" id="learnDoneBtn">${done ? '已学会 ✓' : '标记学会了'}</button>
+        <button class="small-btn" id="learnDoneBtn">${done ? '取消学会' : '标记学会了'}</button>
         <button class="small-btn" id="learnNextBtn">${state.learnIndex === state.learnQueue.length-1 ? '完成' : '下一题'}</button>
       </div>
     </div>`;
   $('#learnFavBtn').addEventListener('click', () => toggleFavorite(item.id));
   $('#learnDoneBtn').addEventListener('click', () => {
-    if (isMastered(item.id)) return; // 已永久掌握
+    if (isMastered(item.id)) {
+      // 再次点击取消“学会”，回到未掌握状态，重新加入未来的学习池
+      delete state.learned[item.id];
+      save(LS_LEARNED, state.learned);
+      renderLearn();
+      renderCheckin();
+      return;
+    }
     state.learned[item.id] = todayKey();
     save(LS_LEARNED, state.learned);
     if (state.learnIndex < state.learnQueue.length - 1) {
